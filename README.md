@@ -13,7 +13,7 @@ We've had a look at the awesome `$http` service that Angular provides, but there
 
 ## What is $resource?
 
-$resource is a factory that creates a resource object for us to communicate with APIs. We pass through a URL and it gives us an object back that looks like this:
+$resource is a service that creates a resource object for us to communicate with APIs. We pass through a URL and it gives us an object back that looks like this:
 
 ```js
 var User = $resource('/user/:userId');
@@ -32,9 +32,33 @@ Here, we've defined our URL. Let's break that down:
 
 We're defining our URL as `/user/:userId` - but hold on, we can't have colons in our URLs!?
 
-Well, with $resource, using a colon in a URL means that section is *actually* a variable. `:userId` means that we aren't actually going to put `:userId` into our URL, rather that we will be replacing `:userId` with an actual user ID. This allows us to put our data into our URL - for instance, we would end up querying `/user/1` or `/user/1231938`.
+Well, with $resource, using a colon in a URL means that section is *actually* a variable. `:userId` means that we aren't actually going to put `:userId` into our URL, rather that we will be replacing `:userId` with an actual user ID. This allows us to put our data into our URL - for instance, we would end up querying `/user/1` or `/user/1231938`. All requests will go to the same URL, unless we don't specify a userId. If we don't specify a userId, it will just go to `/rest/user`.
 
 Now, our `User` variable is equal to an object containing multiple functions. We can call these to make the appropriate requests.
+
+### Usage in a service
+
+To use this in our service, we'd define our `$resource` at the top, and then different methods will use that resource.
+
+```js
+function UserService($resource) {
+	var User = $resource('/user/:userId');
+
+	this.getUser = function (userId, callback) {
+		User.get({userId: userId}, callback);
+	};
+}
+```
+
+And then we can use that as follows in our controllers:
+
+```js
+function MyController(UserService) {
+	UserService.getUser(3, function (user) {
+		console.log(user);
+	});
+}
+```
 
 ### Reading
 
@@ -47,6 +71,16 @@ User.get({userId: 3}, function (user) {
 ```
 
 Our second argument is a callback that gets fired when the request completes. This will make a GET request to `/user/3` (as we've passed in 3 as the `userId`).
+
+If we were to still be using `$http`, it would look like this:
+
+```js
+$http
+	.get('/rest/user/3')
+	.then(function (user) {
+		console.log(user)
+	});
+```
 
 ### Updating and Creating
 
@@ -77,6 +111,16 @@ user.$save();
 
 This will issue a POST request again, with details about our new user.
 
+The `$http` equivalent is:
+
+```js
+$http
+	.post('/rest/user', {name: 'Bill Gates', email: 'bill@microsoft.com'})
+	.then(function (user) {
+		console.log(user)
+	});
+```
+
 ### Removing
 
 We can also delete users, using `.$delete()`.
@@ -89,4 +133,12 @@ User.get({userId: 3}, function (user) {
 
 	user.$delete();
 });
+```
+
+```js
+$http
+	.delete('/rest/user/3')
+	.then(function (user) {
+		console.log(user)
+	});
 ```

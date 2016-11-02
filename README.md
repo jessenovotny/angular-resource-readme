@@ -128,9 +128,7 @@ We can also delete users, using `.$delete()`.
 ```js
 User.get({userId: 3}, function (user) {
 	console.log(user);
-
-	user.email = newEmailAddress;
-
+	
 	user.$delete();
 });
 ```
@@ -142,3 +140,4 @@ $http
 		console.log(user)
 	});
 ```
+<p class='util--hide'>View <a href='https://learn.co/lessons/angular-resource-readme'>Angular Resource</a> on Learn.co and start learning to code for free.</p>
